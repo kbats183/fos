@@ -1,32 +1,47 @@
-#! /bin/bash
-
-function fetchBootTask () {
-    res=$(curl -Lks --data "sysserial=${sysserial}&sysuuid=${sysuuid}&mac=$mac&productKey=${productKey}" ${web}service/ipxe/boot.php 2>/dev/null)
-    res=$(echo "$res" | head -n 8 | tail -n 1)
-}
+#!/bin/bash
+# . /usr/share/fog/lib/funcs.sh
 
 
-fetchBootTask
-
-while [[ ! "$res" =~ ^kernel.bzImage.* ]]; do
-    sleep 5
+function getHInfo() {
     echo "Fetching tasks for $mac from $web"
 
-    fetchBootTask
+    token=$(curl -Lks --data "mac=$base64mac" "${web}status/hostgetkey.php")
+    curl -Lks -o /tmp/hinfo.txt --data "sysuuid=${sysuuid}&mac=$mac&hosttoken=${token}" "${web}service/hostinfo.php" -A ''
+}
+
+# sysuuid=$(dmidecode -s system-uuid)
+# sysuuid=${sysuuid,,}
+#mac=$(getMACAddresses)
+
+mac=08:00:27:7b:22:bd
+sysuuid=$(sudo dmidecode -s system-uuid)
+sysuuid=${sysuuid,,}
+base64mac=$(echo $mac | base64)
+
+getHInfo
+echo $token
+
+while [[ "$token" == "Invalid Host" ]]; do
+    echo "Host $mac is not registered, starting Quick Registration"
+    sleep 3
+    
+    # fog.auto.reg
+
+    getHInfo
 done
 
-echo "A new task has been received with the following options"
-
-for var in $(echo $res); do
-    var=$(echo "${var}" | awk -F= '{name=$1; gsub(/[+][_][+]/," ",$2); gsub(/"/,"\\\"", $2); value=$2; if (length($2) == 0 || $0 !~ /=/ || $0 ~ /nvme_core\.default_ps_max_latency_us=/) {print "";} else {printf("%s=%s", name, value)}}')
-    [[ -z $var ]] && continue;
-    echo "- $var"
-
-    eval "export ${var}" 2>/dev/null
+while [[ "$token" == "Invalid Tasking" ]]; do
+    sleep 5
+    getHInfo
 done
 
-echo "Start default fog script in 5 seconds"
-sleep 5
+echo "A new task has been fetched with options"
+sed -E 's/^\[\[\s-z\s\$\w+ \]\]\s\&\&\sexport\s(\w+)=(.+)$/\1 = \2/' /tmp/hinfo.txt
+
+sleep 3
+
+dots "Running fog script"
+[[ -f /tmp/hinfo.txt ]] && sed -E 's/^\[\[\s-z\s\$\w+ \]\]\s\&\&\s(.+)$/\1/' /tmp/hinfo.txt > /tmp/hinfo-patched.txt
+[[ -f /tmp/hinfo.txt ]] && . /tmp/hinfo-patched.txt
 
 fog
-
