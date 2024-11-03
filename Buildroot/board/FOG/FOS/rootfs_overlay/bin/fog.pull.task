@@ -1,6 +1,11 @@
 #!/bin/bash
-# . /usr/share/fog/lib/funcs.sh
 
+. /usr/share/fog/lib/funcs.sh
+
+sysuuid=$(dmidecode -s system-uuid)
+sysuuid=${sysuuid,,}
+mac=$(getMACAddresses)
+base64mac=$(echo $mac | base64)
 
 function getHInfo() {
     echo "Fetching tasks for $mac from $web"
@@ -9,15 +14,6 @@ function getHInfo() {
     curl -Lks -o /tmp/hinfo.txt --data "sysuuid=${sysuuid}&mac=$mac&hosttoken=${token}" "${web}service/hostinfo.php" -A ''
 }
 
-# sysuuid=$(dmidecode -s system-uuid)
-# sysuuid=${sysuuid,,}
-#mac=$(getMACAddresses)
-
-mac=08:00:27:7b:22:bd
-sysuuid=$(sudo dmidecode -s system-uuid)
-sysuuid=${sysuuid,,}
-base64mac=$(echo $mac | base64)
-
 getHInfo
 echo $token
 
@@ -25,7 +21,7 @@ while [[ "$token" == "Invalid Host" ]]; do
     echo "Host $mac is not registered, starting Quick Registration"
     sleep 3
     
-    # fog.auto.reg
+    fog.auto.reg
 
     getHInfo
 done
