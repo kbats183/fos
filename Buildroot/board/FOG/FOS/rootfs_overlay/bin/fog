@@ -30,6 +30,10 @@ else
     echo "Skipped"
     debugPause
 fi
+
+echo "Switch option mode=$mode type=$type"
+usleep $((5 * 1000000))
+
 if [[ -n $mode && $mode != +(*debug*) && -z $type ]]; then
     case $mode in
         wipe)
