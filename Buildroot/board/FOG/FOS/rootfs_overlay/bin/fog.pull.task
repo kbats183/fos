@@ -18,8 +18,8 @@ function getHInfo() {
 
     echo "Actual token"
     cat /tmp/hosttoken
-    token=$(cat /tmp/hosttoken) # replace -s to -S
-    # token=$(curl -LkS --data "mac=$base64mac" "${web}status/hostgetkey.php") # replace -s to -S
+    token=$(cat /tmp/hosttoken)
+    
     usleep $((10 * 1000000))
     if [[ -z $token ]]; then
         token=Invalid
