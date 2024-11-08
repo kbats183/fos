@@ -22,6 +22,7 @@ while [[ "$token" == "Invalid Host" ]]; do
     
     fog.auto.reg
 
+    usleep $((3 * 1000000))
     getHInfo
 done
 
@@ -33,7 +34,7 @@ done
 echo "A new task has been fetched with options"
 sed -E 's/^\[\[\s-z\s\$\w+ \]\]\s\&\&\sexport\s(\w+)=(.+)$/\1=\2/' /tmp/hinfo.txt | awk '{print}' ORS=' '
 
-usleep $((5 * 1000000))
+usleep $((20 * 1000000))
 
 dots "Running fog script"
 [[ -f /tmp/hinfo.txt ]] && sed -E 's/^\[\[\s-z\s\$\w+ \]\]\s\&\&\s(.+)$/\1/' /tmp/hinfo.txt > /tmp/hinfo-patched.txt
