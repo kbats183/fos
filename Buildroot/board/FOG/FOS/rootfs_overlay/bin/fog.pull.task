@@ -40,7 +40,7 @@ while [[ "$token" == "Invalid Host" ]]; do
     getHInfo
 done
 
-while [[ "$token" == "Invalid Tasking" ]]; do
+while [[ "$token" ~= Invalid* ]]; do
     usleep $((5 * 1000000))
     getHInfo
 done
