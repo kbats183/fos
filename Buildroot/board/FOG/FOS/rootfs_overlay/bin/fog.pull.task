@@ -8,17 +8,19 @@ mac=$(getMACAddresses)
 base64mac=$(echo $mac | base64)
 
 echo "Hello I am fast!"
-usleep $((10 * 1000000))
+usleep $((5 * 1000000))
 
 function getHInfo() {
     echo "Fetching tasks for $mac from $web"
     
     curl -LkS -o /tmp/hosttoken --data "mac=$base64mac" "${web}status/hostgetkey.php"
+    usleep $((10 * 1000000))
+
+    echo "Actual token"
     cat /tmp/hosttoken
-
-
     token=$(cat /tmp/hosttoken) # replace -s to -S
     # token=$(curl -LkS --data "mac=$base64mac" "${web}status/hostgetkey.php") # replace -s to -S
+    usleep $((10 * 1000000))
     if [[ -z $token ]]; then
         token=Invalid
     fi
@@ -28,6 +30,7 @@ function getHInfo() {
     fi;
 }
 
+usleep $((5 * 1000000))
 getHInfo
 
 while [[ "$token" == "Invalid Host" ]]; do
