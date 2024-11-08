@@ -7,12 +7,25 @@ sysuuid=${sysuuid,,}
 mac=$(getMACAddresses)
 base64mac=$(echo $mac | base64)
 
+echo "Hello I am fast!"
+usleep $((10 * 1000000))
+
 function getHInfo() {
     echo "Fetching tasks for $mac from $web"
+    
+    curl -LkS -o /tmp/hosttoken --data "mac=$base64mac" "${web}status/hostgetkey.php"
+    cat /tmp/hosttoken
 
-    token=$(curl -Lks --data "mac=$base64mac" "${web}status/hostgetkey.php")
-    echo "Token is $token"
-    curl -Lks -o /tmp/hinfo.txt --data "sysuuid=${sysuuid}&mac=$mac&hosttoken=${token}" "${web}service/hostinfo.php" -A ''
+
+    token=$(cat /tmp/hosttoken) # replace -s to -S
+    # token=$(curl -LkS --data "mac=$base64mac" "${web}status/hostgetkey.php") # replace -s to -S
+    if [[ -z $token ]]; then
+        token=Invalid
+    fi
+
+    if [[ ! $token =~ Invalid* ]]; then
+        curl -Lks -o /tmp/hinfo.txt --data "sysuuid=${sysuuid}&mac=$mac&hosttoken=${token}" "${web}service/hostinfo.php" -A ''
+    fi;
 }
 
 getHInfo
