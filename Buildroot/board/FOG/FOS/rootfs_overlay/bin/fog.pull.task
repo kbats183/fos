@@ -31,6 +31,10 @@ function getHInfo() {
 }
 
 usleep $((5 * 1000000))
+
+
+dots "Registred host name"
+curl -LkS --data "mac=$mac" "${web}service/ipxe/boot.php" | grep 'item --gap Host is registered as' | awk -E 's/^item\s--gap\sHost\sis\sregistered\sas\s(.*)\!$/\1/' 
 getHInfo
 
 while [[ "$token" == "Invalid Host" ]]; do
