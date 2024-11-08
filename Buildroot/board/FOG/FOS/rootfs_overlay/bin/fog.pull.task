@@ -11,6 +11,7 @@ function getHInfo() {
     echo "Fetching tasks for $mac from $web"
 
     token=$(curl -Lks --data "mac=$base64mac" "${web}status/hostgetkey.php")
+    echo "Token is $token"
     curl -Lks -o /tmp/hinfo.txt --data "sysuuid=${sysuuid}&mac=$mac&hosttoken=${token}" "${web}service/hostinfo.php" -A ''
 }
 
