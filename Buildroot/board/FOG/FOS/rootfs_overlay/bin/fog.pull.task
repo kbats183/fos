@@ -10,32 +10,31 @@ base64mac=$(echo $mac | base64)
 echo "Hello I am fast!"
 usleep $((5 * 1000000))
 
+token=""
 function getHInfo() {
     echo "Fetching tasks for $mac from $web"
     
     curl -LkS -o /tmp/hosttoken --data "mac=$base64mac" "${web}status/hostgetkey.php"
     usleep $((10 * 1000000))
 
-    echo "Actual token"
+    echo "Actual token: "
     cat /tmp/hosttoken
+    echo ":"
     token=$(cat /tmp/hosttoken)
     
     usleep $((10 * 1000000))
     if [[ -z $token ]]; then
-        token=Invalid
+        token="Invalid Tasking"
     fi
 
-    if [[ ! $token =~ Invalid* ]]; then
+    if [[ ! "$token" =~ Invalid* ]]; then
+        echo "Pulling tasks"
         curl -Lks -o /tmp/hinfo.txt --data "sysuuid=${sysuuid}&mac=$mac&hosttoken=${token}" "${web}service/hostinfo.php" -A ''
     fi;
 }
 
 usleep $((5 * 1000000))
 
-
-dots "Registred host name"
-curl -LkS --data "mac=$mac" "${web}service/ipxe/boot.php" | grep 'item --gap Host is registered as' | awk -E 's/^item\s--gap\sHost\sis\sregistered\sas\s(.*)\!$/\1/' 
-getHInfo
 
 while [[ "$token" == "Invalid Host" ]]; do
     echo "Host $mac is not registered, starting Quick Registration"
@@ -47,7 +46,13 @@ while [[ "$token" == "Invalid Host" ]]; do
     getHInfo
 done
 
-while [[ "$token" ~= Invalid* ]]; do
+dots "Registred host name"
+curl -LkS --data "mac=$mac" "${web}service/ipxe/boot.php" | grep 'item --gap Host is registered as' | sed -E 's/^item\s--gap\sHost\sis\sregistered\sas\s(.*)\!$/\1/' 
+usleep $((5 * 1000000))
+
+getHInfo
+
+while [[ "$token" == "Invalid Tasking" ]]; do
     usleep $((5 * 1000000))
     getHInfo
 done
