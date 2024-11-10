@@ -53,6 +53,10 @@ usleep $((5 * 1000000))
 dots "Powered by electricity state (should be 1)"
 cat /sys/class/power_supply/AC*/online
 
+echo "MTU:"
+/sbin/ip link show
+/sbin/ip link show | grep mtu
+
 getHInfo
 
 while [[ "$token" == "Invalid Tasking" ]]; do
