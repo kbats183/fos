@@ -11,7 +11,7 @@ token=""
 function getHInfo() {
     echo "Fetching tasks for $mac from $web"
     
-    token=$(curl -Lks -o /tmp/hosttoken --data "mac=$base64mac" "${web}status/hostgetkey.php")
+    token=$(curl -Lks --data "mac=$base64mac" "${web}status/hostgetkey.php")
     
     echo "Actual token: $token"
     
@@ -43,22 +43,6 @@ echo ""
 dots "Registred host name"
 curl -Lks --data "mac=$mac" "${web}service/ipxe/boot.php" | grep 'item --gap Host is registered as' | sed -E 's/^item\s--gap\sHost\sis\sregistered\sas\s(.*)\!$/\1/' 
 usleep $((5 * 1000000))
-
-dots "Powered by electricity state (should be 1)"
-echo ""
-ls /sys/class/power_supply/AC*
-echo ""
-usleep $((5 * 1000000))
-ls /sys/class/power_supply/
-echo ""
-usleep $((5 * 1000000))
-ls /sys/class/
-echo ""
-usleep $((5 * 1000000))
-ls /sys/
-echo ""
-usleep $((5 * 1000000))
-
 
 getHInfo
 
