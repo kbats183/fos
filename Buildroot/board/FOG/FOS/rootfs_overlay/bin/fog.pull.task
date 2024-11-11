@@ -11,18 +11,14 @@ token=""
 function getHInfo() {
     echo "Fetching tasks for $mac from $web"
     
-    curl -Lks -o /tmp/hosttoken --data "mac=$base64mac" "${web}status/hostgetkey.php"
-    usleep $((10 * 1000000))
-
-    echo -n "Actual token: "
-    cat /tmp/hosttoken
-    echo ""
-    token=$(cat /tmp/hosttoken)
+    token=$(curl -Lks -o /tmp/hosttoken --data "mac=$base64mac" "${web}status/hostgetkey.php")
     
-    usleep $((10 * 1000000))
+    echo "Actual token: $token"
+    
+    usleep $((5 * 1000000))
     if [[ -z $token ]]; then
         echo "NO TOKEN, than set "
-        usleep $((10 * 1000000))
+        usleep $((5 * 1000000))
         token="Invalid Tasking"
     fi
 
@@ -37,11 +33,9 @@ getHInfo
 
 while [[ "$token" == "Invalid Host" ]]; do
     echo "Host $mac is not registered, starting Quick Registration"
-    usleep $((3 * 1000000))
     
     fog.auto.reg
 
-    usleep $((3 * 1000000))
     getHInfo
 done
 
@@ -53,6 +47,9 @@ usleep $((5 * 1000000))
 dots "Powered by electricity state (should be 1)"
 echo ""
 ls /sys/class/power_supply/AC*
+echo ""
+usleep $((5 * 1000000))
+ls /sys/class/power_supply/
 echo ""
 usleep $((5 * 1000000))
 ls /sys/class/
@@ -73,9 +70,8 @@ done
 echo "A new task has been fetched with options"
 sed -E 's/^\[\[\s-z\s\$\w+ \]\]\s\&\&\sexport\s(\w+)=(.+)$/\1=\2/' /tmp/hinfo.txt | awk '{print}' ORS=' '
 
-usleep $((10 * 1000000))
+usleep $((3 * 1000000))
 
-dots "Running fog script"
 [[ -f /tmp/hinfo.txt ]] && sed -E 's/^\[\[\s-z\s\$\w+ \]\]\s\&\&\s(.+)$/\1/' /tmp/hinfo.txt > /tmp/hinfo-patched.txt
 [[ -f /tmp/hinfo.txt ]] && . /tmp/hinfo-patched.txt
 

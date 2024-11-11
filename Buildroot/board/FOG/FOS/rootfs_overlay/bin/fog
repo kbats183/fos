@@ -75,6 +75,9 @@ if [[ -n $mode && $mode != +(*debug*) && -z $type ]]; then
         pulltask)
             fog.pull.task
             ;;
+        bash)
+            /bin/bash
+            ;;
         *)
             handleError "Fatal Error: Unknown mode :: $mode ($0)\n   Args Passed: $*"
             ;;
