@@ -51,11 +51,17 @@ curl -Lks --data "mac=$mac" "${web}service/ipxe/boot.php" | grep 'item --gap Hos
 usleep $((5 * 1000000))
 
 dots "Powered by electricity state (should be 1)"
-cat /sys/class/power_supply/AC*/online
+echo ""
+ls /sys/class/power_supply/AC*
+echo ""
+usleep $((5 * 1000000))
+ls /sys/class/power_supply/
+echo ""
+usleep $((5 * 1000000))
+ls /sys/class/pow*
+echo ""
+usleep $((5 * 1000000))
 
-echo "MTU:"
-/sbin/ip link show
-/sbin/ip link show | grep mtu
 
 getHInfo
 
