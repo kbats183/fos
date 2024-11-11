@@ -55,10 +55,10 @@ echo ""
 ls /sys/class/power_supply/AC*
 echo ""
 usleep $((5 * 1000000))
-ls /sys/class/power_supply/
+ls /sys/class/
 echo ""
 usleep $((5 * 1000000))
-ls /sys/class/pow*
+ls /sys/
 echo ""
 usleep $((5 * 1000000))
 
