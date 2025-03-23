@@ -1,0 +1,36 @@
+#!/bin/bash
+
+. /usr/share/fog/lib/funcs.sh
+
+function runIperf() {
+    iperf3 -c $storageip -t 3 > /tmp/iperf.log 2> /tmp/iperf.err
+
+    if [ $? -eq 0 ]; then
+        echo
+        cat /tmp/iperf.log
+        return 0
+    fi
+    return 1
+}
+
+function runIperfTest() {
+    dots "Running iperf3 test to $storageip"
+
+    while true; do
+        runIperf
+        if [ $? -eq 0 ]; then
+            return 0
+        else
+            if grep -q "server is busy running a test" /tmp/iperf.err; then
+                echo -n "."
+                usleep 1000000
+            else
+                echo
+                cat /tmp/iperf.err
+                return 1
+            fi
+        fi
+    done;
+}
+
+runIperfTest
