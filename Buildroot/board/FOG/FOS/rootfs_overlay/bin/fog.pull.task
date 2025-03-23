@@ -7,9 +7,19 @@ sysuuid=${sysuuid,,}
 mac=$(getMACAddresses)
 base64mac=$(echo $mac | base64)
 
+network_speed=""
+if [ -n "$run_iperf" ]; then
+    fog.iperf
+    if [ $? -eq 0 ]; then
+        network_speed="$(grep receiver /tmp/iperf.log | awk '{print $7}')"
+        network_speed="(iperf3 test $network_speed)"
+    fi;
+fi;
+
+
 token=""
 function getHInfo() {
-    echo "Fetching tasks for $mac from $web"
+    echo "Fetching tasks for $mac from $web $network_speed"
     
     token=$(curl -Lks --data "mac=$base64mac" "${web}status/hostgetkey.php")
     
