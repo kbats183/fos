@@ -879,7 +879,7 @@ writeImage()  {
         5|6)
             # ZSTD Compressed image.
             echo " * Imaging using Partclone (zstd)"
-            zstdmt -dc </tmp/pigz1 | partclone.restore -n "Storage Location $storage, Image name $img" --ignore_crc -O ${target} -Nf 1
+            zstdmt -T0 -dc </tmp/pigz1 | partclone.restore -n "Storage Location $storage, Image name $img" --ignore_crc -O ${target} -Nf 1
             ;;
         3|4)
             # Uncompressed partclone
