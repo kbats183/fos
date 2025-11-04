@@ -12,20 +12,15 @@ if [ -n "$run_iperf" ]; then
     fog.iperf
     if [ $? -eq 0 ]; then
         network_speed="$(grep receiver /tmp/iperf.log | awk '{print $7$8}')"
-        network_speed=" (iperf3 $network_speed)"
     fi;
 fi;
 
 
 token=""
 function getHInfo() {
-    echo "Fetching tasks for $mac from $web$network_speed"
-    
     token=$(curl -Lks --data "mac=$base64mac" "${web}status/hostgetkey.php")
-    
-    # echo "Actual token: $token"
-    
-    usleep $((5 * 1000000))
+
+    usleep $((1 * 1000000))
     if [[ -z $token ]]; then
         echo "NO TOKEN, than set "
         usleep $((5 * 1000000))
@@ -33,31 +28,37 @@ function getHInfo() {
     fi
 
     if [[ ! "$token" =~ Invalid* ]]; then
-        echo "Pulling tasks"
+        echo "\nPulling tasks"
         curl -Lks -o /tmp/hinfo.txt --data "sysuuid=${sysuuid}&mac=$mac&hosttoken=${token}" "${web}service/hostinfo.php" -A ''
     fi;
 }
 
-usleep $((5 * 1000000))
+usleep $((1 * 1000000))
 getHInfo
 
 while [[ "$token" == "Invalid Host" ]]; do
     echo "Host $mac is not registered, starting Quick Registration"
-    
-    fog.auto.reg
 
+    fog.auto.reg
     getHInfo
 done
 
 echo ""
+
 dots "Registred host name"
-curl -Lks --data "mac=$mac" "${web}service/ipxe/boot.php" | grep 'item --gap Host is registered as' | sed -E 's/^item\s--gap\sHost\sis\sregistered\sas\s(.*)\!$/\1/' 
-usleep $((5 * 1000000))
+curl -Lks --data "mac=$mac" "${web}service/ipxe/boot.php" | grep 'item --gap Host is registered as' | sed -E 's/^item\s--gap\sHost\sis\sregistered\sas\s(.*)\!$/\1/'
+if [ -n "$network_speed" ]; then
+    dots "Network bandwidth (iperf3)"
+    echo "$network_speed"
+fi
 
-getHInfo
 
+usleep $((1 * 1000000))
+
+echo "Fetching tasks for $mac from $web$network_speed"
 while [[ "$token" == "Invalid Tasking" ]]; do
     usleep $((5 * 1000000))
+    echo -n "."
     getHInfo
 done
 
